@@ -10,9 +10,6 @@
 extern "C" {
 #endif
 
-#define CONFIG_I2C_MASTER_SCL GPIO_NUM_22  /*!< gpio number for I2C master clock */
-#define CONFIG_I2C_MASTER_SDA GPIO_NUM_23  /*!< gpio number for I2C master data  */
-
 /** Temperature sensor callback
  *
  * @param[in] temperature temperature value in degrees Celsius and humidity from sensor

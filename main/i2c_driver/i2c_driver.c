@@ -7,6 +7,7 @@
 #include "esp_err.h"
 #include "esp_check.h"
 #include "driver/i2c_master.h"
+#include "driver/i2c.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 

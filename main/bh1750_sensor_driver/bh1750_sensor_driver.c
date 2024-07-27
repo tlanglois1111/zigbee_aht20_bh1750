@@ -49,14 +49,13 @@ static void bh1750_sensor_driver_value_update(void *arg) {
         bh1750_measure_mode_t cmd_measure;
         float bh1750_data;
 
-        ESP_ERROR_CHECK(bh1750_power_on(bh1750));
-
-        // one-shot mode
-        cmd_measure = BH1750_ONETIME_4LX_RES;
+        // get data 
+        cmd_measure = BH1750_CONTINUE_1LX_RES;
         ESP_ERROR_CHECK(bh1750_set_measure_mode(bh1750, cmd_measure));
         vTaskDelay(30 / portTICK_PERIOD_MS);
 
         ESP_ERROR_CHECK(bh1750_get_data(bh1750, &bh1750_data));
+
         if (func_ptr) {
             func_ptr(bh1750_data);
         }
@@ -71,6 +70,8 @@ static void bh1750_sensor_driver_value_update(void *arg) {
  */
 static esp_err_t bh1750_sensor_init() {
     ESP_ERROR_CHECK(esp_bh1750_create());
+    ESP_ERROR_CHECK(bh1750_power_on(bh1750));
+
     if (bh1750 == NULL) {
         ESP_LOGI(TAG, "bh1750 is null!");
         return ESP_FAIL;
