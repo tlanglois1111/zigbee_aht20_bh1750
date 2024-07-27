@@ -58,15 +58,20 @@ static const char *TAG = "ESP_ZB_MULTI_SENSOR";
 #define MODEL_IDENTIFIER "\x09" CONFIG_IDF_TARGET
 
 /********************* Zigbee functions **************************/
-static int16_t zb_float_to_s16(float temp)
+static int16_t zb_temp_to_s16(float temp)
 {
   return (int16_t)(temp * 100);
 }
 
+static uint16_t zb_lux_to_s16(float lux)
+{
+  return (uint16_t)(lux*100);
+}
+
 static void esp_aht20_sensor_handler(float temperature, float humidity)
 {
-  int16_t temp_value = zb_float_to_s16(temperature);
-  int16_t humidity_value = zb_float_to_s16(humidity);
+  int16_t temp_value = zb_temp_to_s16(temperature);
+  int16_t humidity_value = zb_temp_to_s16(humidity);
   // ESP_LOGI(TAG, "Updating temperature value: %02.1f", temperature);
   // ESP_LOGI(TAG, "Updating humidity value: %02.1f", humidity);
 
@@ -83,7 +88,7 @@ static void esp_aht20_sensor_handler(float temperature, float humidity)
 
 static void esp_bh1750_sensor_handler(float illuminance)
 {
-  int16_t ill_value = zb_float_to_s16(illuminance);
+  uint16_t ill_value = zb_lux_to_s16(illuminance);
   /* Update temperature sensor measured value */
   esp_zb_lock_acquire(portMAX_DELAY);
   esp_zb_zcl_set_attribute_val(
@@ -202,18 +207,18 @@ static void esp_zb_task(void *pvParameters)
   /* Create customized temperature sensor endpoint */
   esp_zb_temperature_sensor_cfg_t temp_cfg = ESP_ZB_DEFAULT_TEMPERATURE_SENSOR_CONFIG();
   /* Set (Min|Max)MeasuredValure */
-  temp_cfg.temp_meas_cfg.min_value = zb_float_to_s16(ESP_TEMP_SENSOR_MIN_VALUE);
-  temp_cfg.temp_meas_cfg.max_value = zb_float_to_s16(ESP_TEMP_SENSOR_MAX_VALUE);
+  temp_cfg.temp_meas_cfg.min_value = zb_temp_to_s16(ESP_TEMP_SENSOR_MIN_VALUE);
+  temp_cfg.temp_meas_cfg.max_value = zb_temp_to_s16(ESP_TEMP_SENSOR_MAX_VALUE);
 
   /* Create humidity cluster config*/
   esp_zb_humidity_meas_cluster_cfg_t humidity_cfg;
-  humidity_cfg.max_value = zb_float_to_s16(100);
-  humidity_cfg.min_value = zb_float_to_s16(0);
+  humidity_cfg.min_value = ESP_ZB_ZCL_ATTR_REL_HUMIDITY_MEASUREMENT_MIN_VALUE_MIN_VALUE;
+  humidity_cfg.max_value = ESP_ZB_ZCL_ATTR_REL_HUMIDITY_MEASUREMENT_MAX_VALUE_MAX_VALUE;
 
   /* Create illuminance cluster config */
   esp_zb_illuminance_meas_cluster_cfg_t illuminance_cfg;
-  illuminance_cfg.min_value = zb_float_to_s16(0);
-  illuminance_cfg.max_value = zb_float_to_s16(100000);
+  illuminance_cfg.min_value = ESP_ZB_ZCL_ATTR_ILLUMINANCE_MEASUREMENT_MIN_MEASURED_VALUE_MIN_VALUE;
+  illuminance_cfg.max_value = ESP_ZB_ZCL_ATTR_ILLUMINANCE_MEASUREMENT_MAX_MEASURED_VALUE_MAX_VALUE;
 
   esp_zb_ep_list_t *esp_zb_sensor_ep = custom_sensor_ep_create(HA_ESP_SENSOR_ENDPOINT, &temp_cfg, &humidity_cfg, &illuminance_cfg);
   /* Register the device */
@@ -246,6 +251,10 @@ static void esp_zb_task(void *pvParameters)
           },
       .manuf_code = ESP_ZB_ZCL_ATTR_NON_MANUFACTURER_SPECIFIC,
   };
+  esp_zb_zcl_update_reporting_info(&reporting_info);
+  reporting_info.attr_id = ESP_ZB_ZCL_ATTR_REL_HUMIDITY_MEASUREMENT_VALUE_ID;
+  esp_zb_zcl_update_reporting_info(&reporting_info);
+  reporting_info.attr_id = ESP_ZB_ZCL_ATTR_ILLUMINANCE_MEASUREMENT_MEASURED_VALUE_ID;
   esp_zb_zcl_update_reporting_info(&reporting_info);
   esp_zb_set_primary_network_channel_set(ESP_ZB_PRIMARY_CHANNEL_MASK);
 
