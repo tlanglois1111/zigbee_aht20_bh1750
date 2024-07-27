@@ -10,16 +10,13 @@ The ESP Zigbee SDK provides more examples and tools for productization:
 ## Hardware Required
 
 * One development board with ESP32-H2 or C6 SoC acting as Zigbee end-device
-* an AHT20 and BH1750 sensor connected to I2C bus of EPS32
+* an AHT20 and BH1750 sensor connected to I2C bus of ESP32
 * A USB cable for power supply and programming
 
 ## Configure the project
 
 Before project configuration and build, make sure to set the correct chip target using `idf.py --preview set-target TARGET` command.
-
-## Erase the NVRAM
-
-Before flash it to the board, it is recommended to erase NVRAM if user doesn't want to keep the previous examples or other projects stored info using `idf.py -p PORT erase-flash`
+By default the I2C ports are SCL 22, SDA 23. Edit i2c_driver.h to change the defaults.
 
 ## Build and Flash
 
