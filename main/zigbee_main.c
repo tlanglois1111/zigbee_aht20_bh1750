@@ -65,7 +65,7 @@ static int16_t zb_temp_to_s16(float temp)
 
 static uint16_t zb_lux_to_s16(float lux)
 {
-  return (uint16_t)(lux*100);
+  return (uint16_t)(10000*log10(lux)+1);
 }
 
 static void esp_aht20_sensor_handler(float temperature, float humidity)
